@@ -1,0 +1,75 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "adfsecure"
+		},
+		"AzureBlobStorage1_connectionString": {
+			"value": ""
+		},
+		"AzureSqlDatabase1_connectionString": {
+			"value": ""
+		},
+		"AzureSqlMI1_connectionString": {
+			"value": ""
+		},
+		"AzureSynapseAnalytics1_connectionString": {
+			"value": ""
+		},
+		"KPAKS_password": {
+			"value": ""
+		},
+		"SqlServer1_connectionString": {
+			"value": ""
+		},
+		"sunil_connectionString": {
+			"value": ""
+		},
+		"suniltest_connectionString": {
+			"value": ""
+		},
+		"KPAKS_properties_typeProperties_host": {
+			"value": "20.81.12.199"
+		},
+		"KPAKS_properties_typeProperties_username": {
+			"value": "demo1"
+		},
+		"RestService1_properties_typeProperties_url": {
+			"value": "http://www.7timer.info/bin/api.pl?lon=113.17&lat=23.09&product=astro&output=json"
+		},
+		"AzureBlobStorage1_properties_privateLinkResourceId": {
+			"value": "/subscriptions/222f1459-6ebd-4896-82ab-652d5f6883cf/resourceGroups/sksrg/providers/Microsoft.Storage/storageAccounts/adfsecure"
+		},
+		"AzureBlobStorage1_properties_groupId": {
+			"value": "blob"
+		},
+		"AzureBlobStorage1_properties_fqdns": {
+			"value": [
+				"adfsecure.blob.core.windows.net"
+			]
+		},
+		"PrivateLinkService1_properties_privateLinkResourceId": {
+			"value": "/subscriptions/222f1459-6ebd-4896-82ab-652d5f6883cf/resourceGroups/sksrg/providers/Microsoft.Network/privateLinkServices/skspls"
+		},
+		"PrivateLinkService1_properties_groupId": {
+			"value": ""
+		},
+		"PrivateLinkService1_properties_fqdns": {
+			"value": [
+				"sksmi.5795e84ace8a.database.windows.net"
+			]
+		},
+		"SqlServer1_properties_privateLinkResourceId": {
+			"value": "/subscriptions/222f1459-6ebd-4896-82ab-652d5f6883cf/resourceGroups/sksrg/providers/Microsoft.Sql/servers/sksqlserver"
+		},
+		"SqlServer1_properties_groupId": {
+			"value": "sqlServer"
+		},
+		"SqlServer1_properties_fqdns": {
+			"value": [
+				"sksqlserver.database.windows.net"
+			]
+		}
+	}
+}
