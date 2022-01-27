@@ -1,0 +1,53 @@
+{
+	"name": "pipeline1",
+	"properties": {
+		"activities": [
+			{
+				"name": "dataflow1",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [
+					{
+						"name": "storecolumnname",
+						"value": "skstore"
+					}
+				],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "dataflow1",
+						"type": "DataFlowReference",
+						"datasetParameters": {
+							"PrivateSQlMIDestination": {
+								"storecolumn": {
+									"value": "@pipeline().parameters.sqlmitable",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Coarse"
+				}
+			}
+		],
+		"parameters": {
+			"sqlmitable": {
+				"type": "string",
+				"defaultValue": "store1"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2020-12-29T21:43:34Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

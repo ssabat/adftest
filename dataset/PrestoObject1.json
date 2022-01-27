@@ -1,0 +1,17 @@
+{
+	"name": "PrestoObject1",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "KPAKS",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "PrestoObject",
+		"schema": [],
+		"typeProperties": {
+			"schema": "adlsgen2",
+			"table": "orders"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

@@ -1,0 +1,9 @@
+{
+	"name": "adfsecure",
+	"location": "westus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "502c7cff-9ffb-4747-82fd-65c9b9a6ffe8",
+		"tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47"
+	}
+}
