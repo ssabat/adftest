@@ -1,0 +1,181 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_ACT_PROCESS_AAS_GP')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Process AAS",
+						"type": "WebActivity",
+						"dependsOn": [
+							{
+								"activity": "Check if AAS is not Paused",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"url": {
+								"value": "https://@{pipeline().globalParameters.AAS_Region}.asazure.windows.net/servers/@{pipeline().globalParameters.AAS_ServerName}/models/@{pipeline().parameters.AAS_Modelname}/refreshes",
+								"type": "Expression"
+							},
+							"method": "POST",
+							"body": {
+								"Type": "Full",
+								"CommitMode": "transactional",
+								"MaxParallelism": 2,
+								"RetryCount": 2,
+								"Objects": []
+							},
+							"authentication": {
+								"type": "MSI",
+								"resource": "https://*.asazure.windows.net"
+							}
+						}
+					},
+					{
+						"name": "Check_AAS_Status",
+						"type": "WebActivity",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"url": {
+								"value": "https://management.azure.com/subscriptions/@{pipeline().globalParameters.SubscriptionId}/resourceGroups/@{pipeline().globalParameters.AAS_ResourceGroupName}/providers/Microsoft.AnalysisServices/servers/@{pipeline().globalParameters.AAS_ServerName}?api-version=2017-08-01",
+								"type": "Expression"
+							},
+							"method": "GET",
+							"body": {
+								"Dummy": "Dummy"
+							},
+							"authentication": {
+								"type": "MSI",
+								"resource": "https://management.azure.com/"
+							}
+						}
+					},
+					{
+						"name": "Check if AAS is not Paused",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "Check_AAS_Status",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@bool(startswith(activity('Check_AAS_Status').output.properties.state,'Paused'))",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "Resume AAS",
+									"type": "WebActivity",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"url": {
+											"value": "https://management.azure.com/subscriptions/@{pipeline().globalParameters.SubscriptionId}/resourceGroups/@{pipeline().globalParameters.AAS_ResourceGroupName}/providers/Microsoft.AnalysisServices/servers/@{pipeline().globalParameters.AAS_ServerName}/@{pipeline().parameters.Action}?api-version=2017-08-01",
+											"type": "Expression"
+										},
+										"method": "POST",
+										"body": {
+											"Nothing": "Nothing"
+										},
+										"authentication": {
+											"type": "MSI",
+											"resource": "https://management.azure.com/"
+										}
+									}
+								},
+								{
+									"name": "Wait before Processing",
+									"type": "Wait",
+									"dependsOn": [
+										{
+											"activity": "Resume AAS",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"waitTimeInSeconds": {
+											"value": "@pipeline().parameters.WaitTime",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"parameters": {
+					"Action": {
+						"type": "string",
+						"defaultValue": "Resume"
+					},
+					"WaitTime": {
+						"type": "int",
+						"defaultValue": 10
+					},
+					"AAS_Modelname": {
+						"type": "string",
+						"defaultValue": "adventureworks"
+					},
+					"AAS_Region": {
+						"type": "string",
+						"defaultValue": "westeurope"
+					}
+				},
+				"folder": {
+					"name": "AAS"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[variables('factoryId')]"
+			]
+		}
+	]
+}
