@@ -29,87 +29,16 @@
 				"userProperties": [],
 				"typeProperties": {
 					"expression": {
-						"value": "@and(activity('Azure Function1').output, activity('Azure Function2').output)",
+						"value": "@and(activity('Web4').output,true )",
 						"type": "Expression"
 					},
 					"activities": [
-						{
-							"name": "App1",
-							"type": "AzureFunctionActivity",
-							"dependsOn": [],
-							"policy": {
-								"timeout": "7.00:00:00",
-								"retry": 0,
-								"retryIntervalInSeconds": 30,
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": []
-						},
-						{
-							"name": "App2",
-							"type": "AzureFunctionActivity",
-							"dependsOn": [],
-							"policy": {
-								"timeout": "7.00:00:00",
-								"retry": 0,
-								"retryIntervalInSeconds": 30,
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": []
-						},
-						{
-							"name": "App3",
-							"type": "AzureFunctionActivity",
-							"dependsOn": [],
-							"policy": {
-								"timeout": "7.00:00:00",
-								"retry": 0,
-								"retryIntervalInSeconds": 30,
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": []
-						},
-						{
-							"name": "AssemblyFunction",
-							"type": "AzureFunctionActivity",
-							"dependsOn": [
-								{
-									"activity": "App1",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								},
-								{
-									"activity": "App2",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								},
-								{
-									"activity": "App3",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
-							"policy": {
-								"timeout": "7.00:00:00",
-								"retry": 0,
-								"retryIntervalInSeconds": 30,
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": []
-						},
 						{
 							"name": "Wait1",
 							"type": "Wait",
 							"dependsOn": [
 								{
-									"activity": "AssemblyFunction",
+									"activity": "Web4",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -118,6 +47,109 @@
 							"userProperties": [],
 							"typeProperties": {
 								"waitTimeInSeconds": 1
+							}
+						},
+						{
+							"name": "Web1",
+							"type": "WebActivity",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"url": "http://app1.pwc.com",
+								"connectVia": {
+									"referenceName": "AutoResolveIntegrationRuntime",
+									"type": "IntegrationRuntimeReference"
+								},
+								"method": "GET"
+							}
+						},
+						{
+							"name": "Web2",
+							"type": "WebActivity",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"url": "http://pp3.pwc.com",
+								"connectVia": {
+									"referenceName": "AutoResolveIntegrationRuntime",
+									"type": "IntegrationRuntimeReference"
+								},
+								"method": "GET"
+							}
+						},
+						{
+							"name": "Web3",
+							"type": "WebActivity",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"url": "http://app3.pwc.com",
+								"connectVia": {
+									"referenceName": "AutoResolveIntegrationRuntime",
+									"type": "IntegrationRuntimeReference"
+								},
+								"method": "GET"
+							}
+						},
+						{
+							"name": "Web4",
+							"type": "WebActivity",
+							"dependsOn": [
+								{
+									"activity": "Web1",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "Web2",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "Web3",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"url": "http://assembly.pwc.com",
+								"connectVia": {
+									"referenceName": "AutoResolveIntegrationRuntime",
+									"type": "IntegrationRuntimeReference"
+								},
+								"method": "GET"
 							}
 						}
 					],
