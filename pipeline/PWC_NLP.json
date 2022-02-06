@@ -1,0 +1,50 @@
+{
+	"name": "PWC_NLP",
+	"properties": {
+		"activities": [
+			{
+				"name": "AKS_EXTRACTION",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "CheckDocExists",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": "htttp://nlpextraction.pwc.com",
+					"connectVia": {
+						"referenceName": "AutoResolveIntegrationRuntime",
+						"type": "IntegrationRuntimeReference"
+					}
+				}
+			},
+			{
+				"name": "CheckDocExists",
+				"type": "Validation",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DelimitedText1",
+						"type": "DatasetReference"
+					},
+					"timeout": "7.00:00:00",
+					"sleep": 10,
+					"childItems": true
+				}
+			}
+		],
+		"annotations": []
+	}
+}
