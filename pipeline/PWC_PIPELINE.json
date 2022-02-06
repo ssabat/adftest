@@ -29,7 +29,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"expression": {
-						"value": "@and(activity('Web4').output,true )",
+						"value": "@activity('PreAssemblyCheeck').output",
 						"type": "Expression"
 					},
 					"activities": [
@@ -97,8 +97,8 @@
 							}
 						},
 						{
-							"name": "Set variable1",
-							"type": "SetVariable",
+							"name": "PreAssemblyCheeck",
+							"type": "WebActivity",
 							"dependsOn": [
 								{
 									"activity": "Web1",
@@ -119,14 +119,45 @@
 									]
 								}
 							],
-							"userProperties": []
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"url": "http://log.azure.com",
+								"connectVia": {
+									"referenceName": "AutoResolveIntegrationRuntime",
+									"type": "IntegrationRuntimeReference"
+								},
+								"method": "GET"
+							}
+						},
+						{
+							"name": "Wait1",
+							"type": "Wait",
+							"dependsOn": [
+								{
+									"activity": "PreAssemblyCheeck",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"waitTimeInSeconds": 1
+							}
 						}
 					],
 					"timeout": "7.00:00:00"
 				}
 			},
 			{
-				"name": "Web4",
+				"name": "DoAssembly",
 				"type": "WebActivity",
 				"dependsOn": [
 					{
@@ -154,9 +185,9 @@
 				}
 			}
 		],
-		"parameters": {
+		"variables": {
 			"APPS_FINISHED": {
-				"type": "bool"
+				"type": "Boolean"
 			}
 		},
 		"annotations": []
