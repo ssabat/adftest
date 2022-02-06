@@ -145,10 +145,12 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
+					"url": "http://assembly.pwc.com",
 					"connectVia": {
 						"referenceName": "AutoResolveIntegrationRuntime",
 						"type": "IntegrationRuntimeReference"
-					}
+					},
+					"method": "GET"
 				}
 			}
 		],
