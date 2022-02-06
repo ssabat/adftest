@@ -1,0 +1,130 @@
+{
+	"name": "PWC_PIPELINE",
+	"properties": {
+		"activities": [
+			{
+				"name": "CheckDocRunAKS",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PWC_NLP",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "UUID_DEPENDENT_PROCESSES",
+				"type": "Until",
+				"dependsOn": [
+					{
+						"activity": "CheckDocRunAKS",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@and(activity('Azure Function1').output, activity('Azure Function2').output)",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "App1",
+							"type": "AzureFunctionActivity",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": []
+						},
+						{
+							"name": "App2",
+							"type": "AzureFunctionActivity",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": []
+						},
+						{
+							"name": "App3",
+							"type": "AzureFunctionActivity",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": []
+						},
+						{
+							"name": "AssemblyFunction",
+							"type": "AzureFunctionActivity",
+							"dependsOn": [
+								{
+									"activity": "App1",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "App2",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "App3",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": []
+						},
+						{
+							"name": "Wait1",
+							"type": "Wait",
+							"dependsOn": [
+								{
+									"activity": "AssemblyFunction",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"waitTimeInSeconds": 1
+							}
+						}
+					],
+					"timeout": "7.00:00:00"
+				}
+			}
+		],
+		"annotations": []
+	}
+}
