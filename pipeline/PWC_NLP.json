@@ -26,7 +26,8 @@
 					"connectVia": {
 						"referenceName": "AutoResolveIntegrationRuntime",
 						"type": "IntegrationRuntimeReference"
-					}
+					},
+					"method": "GET"
 				}
 			},
 			{
