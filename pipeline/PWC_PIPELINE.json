@@ -34,22 +34,6 @@
 					},
 					"activities": [
 						{
-							"name": "Wait1",
-							"type": "Wait",
-							"dependsOn": [
-								{
-									"activity": "Web4",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
-							"userProperties": [],
-							"typeProperties": {
-								"waitTimeInSeconds": 1
-							}
-						},
-						{
 							"name": "Web1",
 							"type": "WebActivity",
 							"dependsOn": [],
@@ -113,8 +97,8 @@
 							}
 						},
 						{
-							"name": "Web4",
-							"type": "WebActivity",
+							"name": "Set variable1",
+							"type": "SetVariable",
 							"dependsOn": [
 								{
 									"activity": "Web1",
@@ -135,28 +119,44 @@
 									]
 								}
 							],
-							"policy": {
-								"timeout": "7.00:00:00",
-								"retry": 0,
-								"retryIntervalInSeconds": 30,
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"url": "http://assembly.pwc.com",
-								"connectVia": {
-									"referenceName": "AutoResolveIntegrationRuntime",
-									"type": "IntegrationRuntimeReference"
-								},
-								"method": "GET"
-							}
+							"userProperties": []
 						}
 					],
 					"timeout": "7.00:00:00"
 				}
+			},
+			{
+				"name": "Web4",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "UUID_DEPENDENT_PROCESSES",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"connectVia": {
+						"referenceName": "AutoResolveIntegrationRuntime",
+						"type": "IntegrationRuntimeReference"
+					}
+				}
 			}
 		],
+		"parameters": {
+			"APPS_FINISHED": {
+				"type": "bool"
+			}
+		},
 		"annotations": []
 	}
 }
