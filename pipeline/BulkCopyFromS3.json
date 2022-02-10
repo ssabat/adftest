@@ -1,0 +1,97 @@
+{
+	"name": "BulkCopyFromS3",
+	"properties": {
+		"activities": [
+			{
+				"name": "LookupPartitionList",
+				"description": "Lookup activity to retrieve the partition list which has not been copied to Azure Data Lake Storage Gen2 from an external control table.",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.01:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "SELECT PartitionPrefix FROM s3_partition_control_table WHERE SuccessOrFailure = 0",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "External_Control_Table",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "ForEachFolderList",
+				"description": "ForEach activity to get the partition list from the Lookup activity and iterates each partition to the TriggerCopy pipeline. You can set the batchCount to run multiple ADF copy jobs concurrently.",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "LookupPartitionList",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('LookupPartitionList').output.value",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"batchCount": 2,
+					"activities": [
+						{
+							"name": "TriggerCopy",
+							"description": "ExecutePipeline activity to execute TriggerCopy pipeline. The reason we create another pipeline to make each copy job copy a parition is because it will make you easy to rerun the failed copy job to reload that specific partition again from AWS S3. All other copy jobs loading other partitions will not be impacted.",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [
+								{
+									"name": "folder name",
+									"value": "@item().folder"
+								}
+							],
+							"typeProperties": {
+								"waitOnCompletion": true,
+								"parameters": {
+									"prefixStr": {
+										"value": "@item().PartitionPrefix",
+										"type": "Expression"
+									},
+									"AWS_S3_bucketName": {
+										"value": "@pipeline().parameters.AWS_S3_bucketName",
+										"type": "Expression"
+									},
+									"Azure_Storage_fileSystem": {
+										"value": "@pipeline().parameters.Azure_Storage_fileSystem",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"AWS_S3_bucketName": {
+				"type": "string",
+				"defaultValue": "/<Input your AWS S3 bucketName>"
+			},
+			"Azure_Storage_fileSystem": {
+				"type": "string",
+				"defaultValue": "/<Input your Azure Storage fileSystem name>"
+			}
+		},
+		"annotations": []
+	}
+}

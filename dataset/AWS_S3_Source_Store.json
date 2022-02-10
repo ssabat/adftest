@@ -1,0 +1,26 @@
+{
+	"name": "AWS_S3_Source_Store",
+	"properties": {
+		"description": "You can input the connection to your AWS S3 as the data source store.",
+		"linkedServiceName": {
+			"referenceName": "AmazonS31",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"AWS_S3_bucketName": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "AmazonS3Location",
+				"bucketName": {
+					"value": "@dataset().AWS_S3_bucketName",
+					"type": "Expression"
+				}
+			}
+		}
+	}
+}

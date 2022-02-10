@@ -1,0 +1,22 @@
+{
+	"name": "Azure_Storage_Destination_Store",
+	"properties": {
+		"description": "You can input the connection to your Azure Data Lake Storage Gen2 as the data destination store.",
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorage1",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"Azure_Storage_fileSystem": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation"
+			}
+		}
+	}
+}

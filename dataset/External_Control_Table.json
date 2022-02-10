@@ -1,0 +1,17 @@
+{
+	"name": "External_Control_Table",
+	"properties": {
+		"description": "You can input the connection to your external control table which is used to store the partition list for AWS S3.",
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabase1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "s3_partition_control_table"
+		}
+	}
+}
