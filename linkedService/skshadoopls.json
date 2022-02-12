@@ -14,10 +14,10 @@
 			"username": "admin",
 			"enableSsl": false,
 			"storageReference": {
-				"referenceName": "AzureBlobStorage2",
+				"referenceName": "HiveStaging",
 				"type": "LinkedServiceReference"
 			},
-			"encryptedCredential": "ew0KICAiVmVyc2lvbiI6ICIyMDE3LTExLTMwIiwNCiAgIlByb3RlY3Rpb25Nb2RlIjogIktleSIsDQogICJTZWNyZXRDb250ZW50VHlwZSI6ICJQbGFpbnRleHQiLA0KICAiQ3JlZGVudGlhbElkIjogIkRBVEFGQUNUT1JZQDVEQTE3OEJELTc4MDgtNDZGNS1BQzBGLUI5NzNENEYwODBFOV82YjJhODExZC0wOWZjLTQzNGEtODU0MS1iZmEyY2IxZjNhOWYiDQp9"
+			"encryptedCredential": "ew0KICAiVmVyc2lvbiI6ICIyMDE3LTExLTMwIiwNCiAgIlByb3RlY3Rpb25Nb2RlIjogIktleSIsDQogICJTZWNyZXRDb250ZW50VHlwZSI6ICJQbGFpbnRleHQiLA0KICAiQ3JlZGVudGlhbElkIjogIkRBVEFGQUNUT1JZQDVEQTE3OEJELTc4MDgtNDZGNS1BQzBGLUI5NzNENEYwODBFOV83OTliODk2MC04MTgzLTQxNjMtYmJiNC1jNjQxMjdiYTkxOWIiDQp9"
 		},
 		"connectVia": {
 			"referenceName": "AutoResolveIntegrationRuntime",
