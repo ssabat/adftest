@@ -7,9 +7,17 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "adfsecure"
 		},
+		"AmazonS31_secretAccessKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'secretAccessKey' of 'AmazonS31'"
+		},
 		"AzureBlobStorage1_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorage1'"
+		},
+		"AzureBlobStorage2_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorage2'"
 		},
 		"AzureSqlDatabase1_connectionString": {
 			"type": "secureString",
@@ -23,6 +31,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'AzureSynapseAnalytics1'"
 		},
+		"HiveStaging_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'HiveStaging'"
+		},
 		"KPAKS_password": {
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'KPAKS'"
@@ -31,13 +43,17 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'SqlServer1'"
 		},
-		"sunil_connectionString": {
+		"skshadoopls_password": {
 			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'sunil'"
+			"metadata": "Secure string for 'password' of 'skshadoopls'"
 		},
 		"suniltest_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'suniltest'"
+		},
+		"AmazonS31_properties_typeProperties_accessKeyId": {
+			"type": "string",
+			"defaultValue": "AKIAJLLI67JFVJXALOYA"
 		},
 		"KPAKS_properties_typeProperties_host": {
 			"type": "string",
@@ -50,6 +66,14 @@
 		"RestService1_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "http://www.7timer.info/bin/api.pl?lon=113.17&lat=23.09&product=astro&output=json"
+		},
+		"skshadoopls_properties_typeProperties_host": {
+			"type": "string",
+			"defaultValue": "skshadoop.azurehdinsight.net"
+		},
+		"skshadoopls_properties_typeProperties_username": {
+			"type": "string",
+			"defaultValue": "admin"
 		},
 		"AzureBlobStorage1_properties_privateLinkResourceId": {
 			"type": "string",
@@ -120,8 +144,14 @@
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
 					},
+					"AmazonS31_secretAccessKey": {
+						"value": "[parameters('AmazonS31_secretAccessKey')]"
+					},
 					"AzureBlobStorage1_connectionString": {
 						"value": "[parameters('AzureBlobStorage1_connectionString')]"
+					},
+					"AzureBlobStorage2_connectionString": {
+						"value": "[parameters('AzureBlobStorage2_connectionString')]"
 					},
 					"AzureSqlDatabase1_connectionString": {
 						"value": "[parameters('AzureSqlDatabase1_connectionString')]"
@@ -132,14 +162,14 @@
 					"AzureSynapseAnalytics1_connectionString": {
 						"value": "[parameters('AzureSynapseAnalytics1_connectionString')]"
 					},
+					"HiveStaging_connectionString": {
+						"value": "[parameters('HiveStaging_connectionString')]"
+					},
 					"KPAKS_password": {
 						"value": "[parameters('KPAKS_password')]"
 					},
 					"SqlServer1_connectionString": {
 						"value": "[parameters('SqlServer1_connectionString')]"
-					},
-					"sunil_connectionString": {
-						"value": "[parameters('sunil_connectionString')]"
 					},
 					"suniltest_connectionString": {
 						"value": "[parameters('suniltest_connectionString')]"
@@ -171,6 +201,9 @@
 					"SqlServer1_properties_fqdns": {
 						"value": "[parameters('SqlServer1_properties_fqdns')]"
 					},
+					"AmazonS31_properties_typeProperties_accessKeyId": {
+						"value": "[parameters('AmazonS31_properties_typeProperties_accessKeyId')]"
+					},
 					"KPAKS_properties_typeProperties_host": {
 						"value": "[parameters('KPAKS_properties_typeProperties_host')]"
 					},
@@ -197,6 +230,15 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					},
+					"skshadoopls_password": {
+						"value": "[parameters('skshadoopls_password')]"
+					},
+					"skshadoopls_properties_typeProperties_host": {
+						"value": "[parameters('skshadoopls_properties_typeProperties_host')]"
+					},
+					"skshadoopls_properties_typeProperties_username": {
+						"value": "[parameters('skshadoopls_properties_typeProperties_username')]"
 					}
 				}
 			},

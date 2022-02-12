@@ -7,9 +7,17 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "adfsecure"
 		},
+		"AmazonS31_secretAccessKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'secretAccessKey' of 'AmazonS31'"
+		},
 		"AzureBlobStorage1_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorage1'"
+		},
+		"AzureBlobStorage2_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorage2'"
 		},
 		"AzureSqlDatabase1_connectionString": {
 			"type": "secureString",
@@ -23,6 +31,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'AzureSynapseAnalytics1'"
 		},
+		"HiveStaging_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'HiveStaging'"
+		},
 		"KPAKS_password": {
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'KPAKS'"
@@ -30,10 +42,6 @@
 		"SqlServer1_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'SqlServer1'"
-		},
-		"sunil_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'sunil'"
 		},
 		"suniltest_connectionString": {
 			"type": "secureString",
@@ -80,6 +88,10 @@
 			"defaultValue": [
 				"sksqlserver.database.windows.net"
 			]
+		},
+		"AmazonS31_properties_typeProperties_accessKeyId": {
+			"type": "string",
+			"defaultValue": "AKIAJLLI67JFVJXALOYA"
 		},
 		"KPAKS_properties_typeProperties_host": {
 			"type": "string",
@@ -137,7 +149,8 @@
 						"dataFlowProperties": {
 							"computeType": "General",
 							"coreCount": 8,
-							"timeToLive": 0
+							"timeToLive": 0,
+							"cleanup": true
 						}
 					}
 				},
@@ -216,6 +229,31 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/AmazonS31')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AmazonS3",
+				"typeProperties": {
+					"serviceUrl": "",
+					"accessKeyId": "[parameters('AmazonS31_properties_typeProperties_accessKeyId')]",
+					"secretAccessKey": {
+						"type": "SecureString",
+						"value": "[parameters('AmazonS31_secretAccessKey')]"
+					},
+					"authenticationType": "AccessKey"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/AzureBlobStorage1')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -224,6 +262,25 @@
 				"type": "AzureBlobStorage",
 				"typeProperties": {
 					"connectionString": "[parameters('AzureBlobStorage1_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureBlobStorage2')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('AzureBlobStorage2_connectionString')]"
 				},
 				"connectVia": {
 					"referenceName": "AutoResolveIntegrationRuntime",
@@ -281,6 +338,25 @@
 				"type": "AzureSqlDW",
 				"typeProperties": {
 					"connectionString": "[parameters('AzureSynapseAnalytics1_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/HiveStaging')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('HiveStaging_connectionString')]"
 				},
 				"connectVia": {
 					"referenceName": "AutoResolveIntegrationRuntime",
@@ -366,25 +442,6 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/sunil')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureSqlMI",
-				"typeProperties": {
-					"connectionString": "[parameters('sunil_connectionString')]"
-				},
-				"connectVia": {
-					"referenceName": "integrationRuntime2",
-					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/integrationRuntime2')]"
-			]
-		},
-		{
 			"name": "[concat(parameters('factoryName'), '/suniltest')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -404,272 +461,64 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/AzureSqlMITable1')]",
+			"name": "[concat(parameters('factoryName'), '/AWS_S3_Source_Store')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
+				"description": "You can input the connection to your AWS S3 as the data source store.",
 				"linkedServiceName": {
-					"referenceName": "AzureSqlMI1",
+					"referenceName": "AmazonS31",
 					"type": "LinkedServiceReference"
 				},
 				"parameters": {
-					"storecolumn": {
+					"AWS_S3_bucketName": {
 						"type": "string"
 					}
 				},
 				"annotations": [],
-				"type": "AzureSqlMITable",
-				"schema": [
-					{
-						"name": "store_id",
-						"type": "int",
-						"precision": 10
-					},
-					{
-						"name": "store_name",
-						"type": "varchar"
-					},
-					{
-						"name": "phone",
-						"type": "varchar"
-					},
-					{
-						"name": "email",
-						"type": "varchar"
-					},
-					{
-						"name": "street",
-						"type": "varchar"
-					},
-					{
-						"name": "city",
-						"type": "varchar"
-					},
-					{
-						"name": "state",
-						"type": "varchar"
-					},
-					{
-						"name": "zip_code",
-						"type": "varchar"
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AmazonS3Location",
+						"bucketName": {
+							"value": "@dataset().AWS_S3_bucketName",
+							"type": "Expression"
+						}
 					}
-				],
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AmazonS31')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSqlDWDataDestination')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Connection to your data destination store.",
+				"linkedServiceName": {
+					"referenceName": "AzureSynapseAnalytics1",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"tableName": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlDWTable",
+				"schema": [],
 				"typeProperties": {
 					"schema": "dbo",
 					"table": {
-						"value": "@dataset().storecolumn",
+						"value": "@dataset().tableName",
 						"type": "Expression"
 					}
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/AzureSqlMI1')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/AzureSynapseAnalyticsTable1')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "AzureSynapseAnalytics1",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "AzureSqlDWTable",
-				"schema": [
-					{
-						"name": "EmployeeKey",
-						"type": "int",
-						"precision": 10
-					},
-					{
-						"name": "ParentEmployeeKey",
-						"type": "int",
-						"precision": 10
-					},
-					{
-						"name": "EmployeeNationalIDAlternateKey",
-						"type": "nvarchar"
-					},
-					{
-						"name": "ParentEmployeeNationalIDAlternateKey",
-						"type": "nvarchar"
-					},
-					{
-						"name": "SalesTerritoryKey",
-						"type": "int",
-						"precision": 10
-					},
-					{
-						"name": "FirstName",
-						"type": "nvarchar"
-					},
-					{
-						"name": "LastName",
-						"type": "nvarchar"
-					},
-					{
-						"name": "MiddleName",
-						"type": "nvarchar"
-					},
-					{
-						"name": "NameStyle",
-						"type": "bit"
-					},
-					{
-						"name": "Title",
-						"type": "nvarchar"
-					},
-					{
-						"name": "HireDate",
-						"type": "date"
-					},
-					{
-						"name": "BirthDate",
-						"type": "date"
-					},
-					{
-						"name": "LoginID",
-						"type": "nvarchar"
-					},
-					{
-						"name": "EmailAddress",
-						"type": "nvarchar"
-					},
-					{
-						"name": "Phone",
-						"type": "nvarchar"
-					},
-					{
-						"name": "MaritalStatus",
-						"type": "nchar"
-					},
-					{
-						"name": "EmergencyContactName",
-						"type": "nvarchar"
-					},
-					{
-						"name": "EmergencyContactPhone",
-						"type": "nvarchar"
-					},
-					{
-						"name": "SalariedFlag",
-						"type": "bit"
-					},
-					{
-						"name": "Gender",
-						"type": "nchar"
-					},
-					{
-						"name": "PayFrequency",
-						"type": "tinyint",
-						"precision": 3
-					},
-					{
-						"name": "BaseRate",
-						"type": "money",
-						"precision": 19,
-						"scale": 4
-					},
-					{
-						"name": "VacationHours",
-						"type": "smallint",
-						"precision": 5
-					},
-					{
-						"name": "SickLeaveHours",
-						"type": "smallint",
-						"precision": 5
-					},
-					{
-						"name": "CurrentFlag",
-						"type": "bit"
-					},
-					{
-						"name": "SalesPersonFlag",
-						"type": "bit"
-					},
-					{
-						"name": "DepartmentName",
-						"type": "nvarchar"
-					},
-					{
-						"name": "StartDate",
-						"type": "date"
-					},
-					{
-						"name": "EndDate",
-						"type": "date"
-					},
-					{
-						"name": "Status",
-						"type": "nvarchar"
-					}
-				],
-				"typeProperties": {
-					"schema": "dbo",
-					"table": "AggregateSales"
-				}
-			},
-			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/AzureSynapseAnalytics1')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DelimitedText1')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "AzureBlobStorage1",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobStorageLocation",
-						"folderPath": "samples",
-						"container": "adfsecureblob"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
-				},
-				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStorage1')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DelimitedText2')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "AzureBlobStorage1",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobStorageLocation",
-						"folderPath": "samples",
-						"container": "adfsecureblob"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
-				},
-				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStorage1')]"
 			]
 		}
 	]

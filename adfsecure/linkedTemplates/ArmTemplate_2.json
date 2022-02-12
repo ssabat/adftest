@@ -13,6 +13,1230 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/BulkCopyfromDB_with_ControlTable')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Copy huge amount of data in bulk from database using external control table to store source table list with partitions for each table.\n\nWhen you want to migrate data from your Azure Synapse Analytics like Oracle server, Netezza server, Teradata server or SQL Server to Azure, you have to load huge amount of data from multiple tables in data sources. In most cases, data has to be further partitioned in each table so that you can load rows with multiple threads in parallel from single table.",
+				"activities": [
+					{
+						"name": "GetPartitionList",
+						"description": "Lookup activity to retrieve the list of partitions stored in the external control table.",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlSource",
+								"sqlReaderQuery": {
+									"value": "select @{pipeline().parameters.Control_Table_Schema_PartitionID} as PartitionID, @{pipeline().parameters.Control_Table_Schema_SourceTableName} as SourceTableName, @{pipeline().parameters.Control_Table_Schema_FilterQuery} as FilterQuery from @{pipeline().parameters.Control_Table_Name}",
+									"type": "Expression"
+								},
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "SqlServerExternal_ControlTable",
+								"type": "DatasetReference",
+								"parameters": {
+									"TableName": {
+										"value": "@pipeline().parameters.Control_Table_Name",
+										"type": "Expression"
+									}
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEachPartition",
+						"description": "ForEach activity to get the partition list from Lookup activity and then iterate each of them to Copy activity. ",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "GetPartitionList",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('GetPartitionList').output.value",
+								"type": "Expression"
+							},
+							"batchCount": 5,
+							"activities": [
+								{
+									"name": "CopyOnePartition",
+									"description": "Copy activity to copy each partition from source database store to destination store.",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "SqlSource",
+											"sqlReaderQuery": {
+												"value": "@item().FilterQuery",
+												"type": "Expression"
+											},
+											"partitionOption": "None"
+										},
+										"sink": {
+											"type": "SqlDWSink",
+											"writeBatchSize": 10000,
+											"preCopyScript": {
+												"value": "TRUNCATE TABLE @{item().SourceTableName}",
+												"type": "Expression"
+											},
+											"allowPolyBase": true,
+											"polyBaseSettings": {
+												"rejectValue": 0,
+												"rejectType": "value",
+												"useTypeDefault": true
+											}
+										},
+										"enableStaging": true,
+										"stagingSettings": {
+											"linkedServiceName": {
+												"referenceName": "AzureBlobStorage1",
+												"type": "LinkedServiceReference"
+											}
+										},
+										"dataIntegrationUnits": 0
+									},
+									"inputs": [
+										{
+											"referenceName": "AzureSqlDatabaseDataSource",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "AzureSqlDWDataDestination",
+											"type": "DatasetReference",
+											"parameters": {
+												"tableName": {
+													"value": "@item().SourceTableName",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"Control_Table_Name": {
+						"type": "String"
+					},
+					"Control_Table_Schema_PartitionID": {
+						"type": "String"
+					},
+					"Control_Table_Schema_SourceTableName": {
+						"type": "String"
+					},
+					"Control_Table_Schema_FilterQuery": {
+						"type": "String"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/CopyPipeline_esc')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy_esc",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [
+							{
+								"name": "Source",
+								"value": "adfsecureblob/samples/"
+							},
+							{
+								"name": "Destination",
+								"value": "adfsecureblob/output/"
+							}
+						],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"wildcardFileName": "*",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings",
+									"skipLineCount": 0
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"validateDataConsistency": false
+						},
+						"inputs": [
+							{
+								"referenceName": "SourceDataset_esc",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DestinationDataset_esc",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2020-12-30T06:41:45Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PWC_NLP')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "AKS_EXTRACTION",
+						"type": "WebActivity",
+						"dependsOn": [
+							{
+								"activity": "CheckDocExists",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"url": "htttp://nlpextraction.pwc.com",
+							"connectVia": {
+								"referenceName": "AutoResolveIntegrationRuntime",
+								"type": "IntegrationRuntimeReference"
+							},
+							"method": "GET",
+							"headers": {}
+						}
+					},
+					{
+						"name": "CheckDocExists",
+						"type": "Validation",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "DelimitedText1",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"timeout": "7.00:00:00",
+							"sleep": 10,
+							"childItems": true
+						}
+					},
+					{
+						"name": "Until1",
+						"type": "Until",
+						"dependsOn": [
+							{
+								"activity": "AKS_EXTRACTION",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@activity('AKS_EXTRACTION').output",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Wait1",
+									"type": "Wait",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"waitTimeInSeconds": 1
+									}
+								}
+							],
+							"timeout": "7.00:00:00"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/copyforeach')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy data1",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"wildcardFolderPath": "samples",
+									"wildcardFileName": {
+										"value": "@pipeline().parameters.filename",
+										"type": "Expression"
+									},
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ""
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": false,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "sourcefiledelimited",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "securesink",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"filename": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2020-12-30T15:37:18Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/parquersinnk')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy data1",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [
+							{
+								"name": "Source",
+								"value": "dbo.AggregateSales"
+							},
+							{
+								"name": "Destination",
+								"value": "adfsecureblob//parquet.out"
+							}
+						],
+						"typeProperties": {
+							"source": {
+								"type": "SqlDWSource",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "ParquetSink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSettings"
+								},
+								"formatSettings": {
+									"type": "ParquetWriteSettings"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "SalesAmount",
+											"type": "Decimal",
+											"physicalType": "money",
+											"scale": 4,
+											"precision": 19
+										},
+										"sink": {
+											"name": "SalesAmount",
+											"type": "Decimal",
+											"physicalType": "DECIMAL"
+										}
+									},
+									{
+										"source": {
+											"name": "PostalCode",
+											"type": "String",
+											"physicalType": "nvarchar"
+										},
+										"sink": {
+											"name": "PostalCode",
+											"type": "String",
+											"physicalType": "UTF8"
+										}
+									},
+									{
+										"source": {
+											"name": "CustomerIncome",
+											"type": "Decimal",
+											"physicalType": "money",
+											"scale": 4,
+											"precision": 19
+										},
+										"sink": {
+											"name": "CustomerIncome",
+											"type": "Decimal",
+											"physicalType": "DECIMAL"
+										}
+									},
+									{
+										"source": {
+											"name": "OrderDate",
+											"type": "DateTime",
+											"physicalType": "date"
+										},
+										"sink": {
+											"name": "OrderDate",
+											"type": "DateTime",
+											"physicalType": "INT_96"
+										}
+									}
+								],
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "AzureSynapseAnalyticsTable1",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "Parquet1",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2021-10-20T12:37:10Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pipeline2')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Get Metadata1",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "DelimitedText1",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"fieldList": [
+								"childItems"
+							],
+							"storeSettings": {
+								"type": "AzureBlobStorageReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
+					},
+					{
+						"name": "ForEach1",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Get Metadata1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Get Metadata1').output.childItems",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Append variable1",
+									"type": "AppendVariable",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "filelist",
+										"value": {
+											"value": "@item()",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"variables": {
+					"filelist": {
+						"type": "Array"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2020-12-30T00:01:32Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/dataflow1')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "AzureSynapseAnalyticsTable1",
+								"type": "DatasetReference"
+							},
+							"name": "PrivateSynapseTable"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "DelimitedText1",
+								"type": "DatasetReference"
+							},
+							"name": "PrivateBlobOutput"
+						},
+						{
+							"dataset": {
+								"referenceName": "AzureSqlMITable1",
+								"type": "DatasetReference"
+							},
+							"name": "PrivateSQlMIDestination"
+						}
+					],
+					"transformations": [],
+					"script": "source(output(\n\t\tEmployeeKey as integer,\n\t\tParentEmployeeKey as integer,\n\t\tEmployeeNationalIDAlternateKey as string,\n\t\tParentEmployeeNationalIDAlternateKey as string,\n\t\tSalesTerritoryKey as integer,\n\t\tFirstName as string,\n\t\tLastName as string,\n\t\tMiddleName as string,\n\t\tNameStyle as boolean,\n\t\tTitle as string,\n\t\tHireDate as date,\n\t\tBirthDate as date,\n\t\tLoginID as string,\n\t\tEmailAddress as string,\n\t\tPhone as string,\n\t\tMaritalStatus as string,\n\t\tEmergencyContactName as string,\n\t\tEmergencyContactPhone as string,\n\t\tSalariedFlag as boolean,\n\t\tGender as string,\n\t\tPayFrequency as integer,\n\t\tBaseRate as decimal(19,4),\n\t\tVacationHours as integer,\n\t\tSickLeaveHours as integer,\n\t\tCurrentFlag as boolean,\n\t\tSalesPersonFlag as boolean,\n\t\tDepartmentName as string,\n\t\tStartDate as date,\n\t\tEndDate as date,\n\t\tStatus as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table',\n\tstaged: false) ~> PrivateSynapseTable\nPrivateSynapseTable sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> PrivateBlobOutput\nPrivateSynapseTable sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tinput(\n\t\tstore_id as integer,\n\t\tstore_name as string,\n\t\tphone as string,\n\t\temail as string,\n\t\tstreet as string,\n\t\tcity as string,\n\t\tstate as string,\n\t\tzip_code as string\n\t),\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\trecreate:true,\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError') ~> PrivateSQlMIDestination"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/dataflow2')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"linkedService": {
+								"referenceName": "AzureBlobStorage1",
+								"type": "LinkedServiceReference"
+							},
+							"name": "source1"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "AzureSynapseAnalyticsTable1",
+								"type": "DatasetReference"
+							},
+							"name": "sink1"
+						}
+					],
+					"transformations": [],
+					"script": "source(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tformat: 'delimited',\n\tcontainer: 'adfsecureblob',\n\tfolderPath: 'samples',\n\tfileName: 'moviesDB.csv',\n\tcolumnDelimiter: ',',\n\tescapeChar: '\\\\',\n\tquoteChar: '\\\"',\n\tcolumnNamesAsHeader: false) ~> source1\nsource1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tinput(\n\t\tEmployeeKey as integer,\n\t\tParentEmployeeKey as integer,\n\t\tEmployeeNationalIDAlternateKey as string,\n\t\tParentEmployeeNationalIDAlternateKey as string,\n\t\tSalesTerritoryKey as integer,\n\t\tFirstName as string,\n\t\tLastName as string,\n\t\tMiddleName as string,\n\t\tNameStyle as boolean,\n\t\tTitle as string,\n\t\tHireDate as date,\n\t\tBirthDate as date,\n\t\tLoginID as string,\n\t\tEmailAddress as string,\n\t\tPhone as string,\n\t\tMaritalStatus as string,\n\t\tEmergencyContactName as string,\n\t\tEmergencyContactPhone as string,\n\t\tSalariedFlag as boolean,\n\t\tGender as string,\n\t\tPayFrequency as integer,\n\t\tBaseRate as decimal(19,4),\n\t\tVacationHours as integer,\n\t\tSickLeaveHours as integer,\n\t\tCurrentFlag as boolean,\n\t\tSalesPersonFlag as boolean,\n\t\tDepartmentName as string,\n\t\tStartDate as date,\n\t\tEndDate as date,\n\t\tStatus as string\n\t),\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tstaged: true,\n\tallowCopyCommand: true,\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError') ~> sink1"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/hiveparallel')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"linkedService": {
+								"referenceName": "skshadoopls",
+								"type": "LinkedServiceReference"
+							},
+							"name": "source1"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "DelimitedText2",
+								"type": "DatasetReference"
+							},
+							"name": "sink1"
+						}
+					],
+					"transformations": [],
+					"scriptLines": [
+						"source(output(",
+						"          fyear as string,",
+						"          fmonth as string,",
+						"          fdayofmonth as string,",
+						"          fdayofweek as string,",
+						"          deptime as integer,",
+						"          arrtime as integer,",
+						"          uniquecarrier as string,",
+						"          origin as string,",
+						"          dest as string,",
+						"          distance as integer,",
+						"          isdepdelayed as string,",
+						"          isdepdelayed_rec as integer",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     limit: 100,",
+						"     format: 'table',",
+						"     store: 'hive',",
+						"     schemaName: 'default',",
+						"     tableName: 'airlinestest',",
+						"     staged: true,",
+						"     storageContainer: 'skshadoop-2022-02-11t18-17-57-665z',",
+						"     storageFolderPath: '',",
+						"     stagingDatabaseName: 'adftemp') ~> source1",
+						"source1 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sink1"
+					]
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/BulkCopyFromS3')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "LookupPartitionList",
+						"description": "Lookup activity to retrieve the partition list which has not been copied to Azure Data Lake Storage Gen2 from an external control table.",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.01:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": "SELECT PartitionPrefix FROM s3_partition_control_table WHERE SuccessOrFailure = 0",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "External_Control_Table",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEachFolderList",
+						"description": "ForEach activity to get the partition list from the Lookup activity and iterates each partition to the TriggerCopy pipeline. You can set the batchCount to run multiple ADF copy jobs concurrently.",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "LookupPartitionList",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('LookupPartitionList').output.value",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"batchCount": 2,
+							"activities": [
+								{
+									"name": "TriggerCopy",
+									"description": "ExecutePipeline activity to execute TriggerCopy pipeline. The reason we create another pipeline to make each copy job copy a parition is because it will make you easy to rerun the failed copy job to reload that specific partition again from AWS S3. All other copy jobs loading other partitions will not be impacted.",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [
+										{
+											"name": "folder name",
+											"value": "@item().folder"
+										}
+									],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "copyforeach",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"AWS_S3_bucketName": {
+						"type": "string",
+						"defaultValue": "/<Input your AWS S3 bucketName>"
+					},
+					"Azure_Storage_fileSystem": {
+						"type": "string",
+						"defaultValue": "/<Input your Azure Storage fileSystem name>"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/copyforeach')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PWC_PIPELINE')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "CheckDocRunAKS",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PWC_NLP",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "UUID_DEPENDENT_PROCESSES",
+						"type": "Until",
+						"dependsOn": [
+							{
+								"activity": "CheckDocRunAKS",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@activity('PreAssemblyCheeck').output",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Web1",
+									"type": "WebActivity",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"url": "http://app1.pwc.com",
+										"connectVia": {
+											"referenceName": "AutoResolveIntegrationRuntime",
+											"type": "IntegrationRuntimeReference"
+										},
+										"method": "GET",
+										"headers": {}
+									}
+								},
+								{
+									"name": "Web2",
+									"type": "WebActivity",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"url": "http://pp3.pwc.com",
+										"connectVia": {
+											"referenceName": "AutoResolveIntegrationRuntime",
+											"type": "IntegrationRuntimeReference"
+										},
+										"method": "GET",
+										"headers": {}
+									}
+								},
+								{
+									"name": "Web3",
+									"type": "WebActivity",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"url": "http://app3.pwc.com",
+										"connectVia": {
+											"referenceName": "AutoResolveIntegrationRuntime",
+											"type": "IntegrationRuntimeReference"
+										},
+										"method": "GET",
+										"headers": {}
+									}
+								},
+								{
+									"name": "PreAssemblyCheeck",
+									"type": "WebActivity",
+									"dependsOn": [
+										{
+											"activity": "Web1",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										},
+										{
+											"activity": "Web2",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										},
+										{
+											"activity": "Web3",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"url": "http://log.azure.com",
+										"connectVia": {
+											"referenceName": "AutoResolveIntegrationRuntime",
+											"type": "IntegrationRuntimeReference"
+										},
+										"method": "GET",
+										"headers": {}
+									}
+								},
+								{
+									"name": "Wait1",
+									"type": "Wait",
+									"dependsOn": [
+										{
+											"activity": "PreAssemblyCheeck",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"waitTimeInSeconds": 1
+									}
+								}
+							],
+							"timeout": "7.00:00:00"
+						}
+					},
+					{
+						"name": "DoAssembly",
+						"type": "WebActivity",
+						"dependsOn": [
+							{
+								"activity": "UUID_DEPENDENT_PROCESSES",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"url": "http://assembly.pwc.com",
+							"connectVia": {
+								"referenceName": "AutoResolveIntegrationRuntime",
+								"type": "IntegrationRuntimeReference"
+							},
+							"method": "GET",
+							"headers": {}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"variables": {
+					"APPS_FINISHED": {
+						"type": "Boolean"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PWC_NLP')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pipeline1')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "dataflow1",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [
+							{
+								"name": "storecolumnname",
+								"value": "skstore"
+							}
+						],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "dataflow1",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"PrivateSynapseTable": {},
+									"PrivateBlobOutput": {},
+									"PrivateSQlMIDestination": {
+										"storecolumn": {
+											"value": "@pipeline().parameters.sqlmitable",
+											"type": "Expression"
+										}
+									}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Coarse"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"sqlmitable": {
+						"type": "string",
+						"defaultValue": "store1"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2020-12-29T21:43:34Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/dataflow1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pipeline2_copy1')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Get Metadata1",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "DelimitedText1",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"fieldList": [
+								"childItems"
+							],
+							"storeSettings": {
+								"type": "AzureBlobStorageReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
+					},
+					{
+						"name": "ForEach1",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Get Metadata1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Get Metadata1').output.childItems",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "copyforeach",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "copyforeach",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"filename": {
+												"value": "@item().name",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"variables": {
+					"filelist": {
+						"type": "Array"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2020-12-30T15:26:12Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/copyforeach')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/Trigger_esc')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
@@ -39,7 +1263,9 @@
 					"dependsOn": []
 				}
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/CopyPipeline_esc')]"
+			]
 		}
 	]
 }
