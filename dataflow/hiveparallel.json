@@ -37,7 +37,7 @@
 				"     schemaName: 'default',",
 				"     tableName: 'airlinestest',",
 				"     staged: true,",
-				"     storageContainer: 'AzureBlob1',",
+				"     storageContainer: 'skshadoop-2022-02-11t18-17-57-665z',",
 				"     storageFolderPath: '',",
 				"     stagingDatabaseName: 'adftemp') ~> source1"
 			]
