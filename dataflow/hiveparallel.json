@@ -15,16 +15,31 @@
 			"sinks": [],
 			"transformations": [],
 			"scriptLines": [
-				"source(allowSchemaDrift: true,",
+				"source(output(",
+				"          fyear as string,",
+				"          fmonth as string,",
+				"          fdayofmonth as string,",
+				"          fdayofweek as string,",
+				"          deptime as integer,",
+				"          arrtime as integer,",
+				"          uniquecarrier as string,",
+				"          origin as string,",
+				"          dest as string,",
+				"          distance as integer,",
+				"          isdepdelayed as string,",
+				"          isdepdelayed_rec as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
+				"     limit: 100,",
 				"     format: 'table',",
 				"     store: 'hive',",
-				"     schemaName: '',",
-				"     tableName: '',",
+				"     schemaName: 'default',",
+				"     tableName: 'airlinestest',",
 				"     staged: true,",
-				"     storageContainer: '',",
+				"     storageContainer: 'AzureBlob1',",
 				"     storageFolderPath: '',",
-				"     stagingDatabaseName: '') ~> source1"
+				"     stagingDatabaseName: 'adftemp') ~> source1"
 			]
 		}
 	}
