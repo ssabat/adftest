@@ -1,0 +1,31 @@
+{
+	"name": "hiveparallel",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"linkedService": {
+						"referenceName": "skshadoopls",
+						"type": "LinkedServiceReference"
+					},
+					"name": "source1"
+				}
+			],
+			"sinks": [],
+			"transformations": [],
+			"scriptLines": [
+				"source(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table',",
+				"     store: 'hive',",
+				"     schemaName: '',",
+				"     tableName: '',",
+				"     staged: true,",
+				"     storageContainer: '',",
+				"     storageFolderPath: '',",
+				"     stagingDatabaseName: '') ~> source1"
+			]
+		}
+	}
+}
