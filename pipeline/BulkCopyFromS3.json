@@ -61,21 +61,11 @@
 								}
 							],
 							"typeProperties": {
-								"waitOnCompletion": true,
-								"parameters": {
-									"prefixStr": {
-										"value": "@item().PartitionPrefix",
-										"type": "Expression"
-									},
-									"AWS_S3_bucketName": {
-										"value": "@pipeline().parameters.AWS_S3_bucketName",
-										"type": "Expression"
-									},
-									"Azure_Storage_fileSystem": {
-										"value": "@pipeline().parameters.Azure_Storage_fileSystem",
-										"type": "Expression"
-									}
-								}
+								"pipeline": {
+									"referenceName": "copyforeach",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true
 							}
 						}
 					]

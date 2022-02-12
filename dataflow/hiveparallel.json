@@ -12,7 +12,15 @@
 					"name": "source1"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "DelimitedText2",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
 			"transformations": [],
 			"scriptLines": [
 				"source(output(",
@@ -39,7 +47,11 @@
 				"     staged: true,",
 				"     storageContainer: 'skshadoop-2022-02-11t18-17-57-665z',",
 				"     storageFolderPath: '',",
-				"     stagingDatabaseName: 'adftemp') ~> source1"
+				"     stagingDatabaseName: 'adftemp') ~> source1",
+				"source1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink1"
 			]
 		}
 	}
