@@ -31,6 +31,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'AzureSynapseAnalytics1'"
 		},
+		"Hdfs1_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'Hdfs1'"
+		},
 		"HiveStaging_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'HiveStaging'"
@@ -54,6 +58,14 @@
 		"AmazonS31_properties_typeProperties_accessKeyId": {
 			"type": "string",
 			"defaultValue": "AKIAJLLI67JFVJXALOYA"
+		},
+		"Hdfs1_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "adl://skshadoop-2022-02-11t18-17-57-665z@skshadoophdistorage.blob.core.windows.net/data"
+		},
+		"Hdfs1_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "sshuser"
 		},
 		"KPAKS_properties_typeProperties_host": {
 			"type": "string",
@@ -162,6 +174,9 @@
 					"AzureSynapseAnalytics1_connectionString": {
 						"value": "[parameters('AzureSynapseAnalytics1_connectionString')]"
 					},
+					"Hdfs1_password": {
+						"value": "[parameters('Hdfs1_password')]"
+					},
 					"HiveStaging_connectionString": {
 						"value": "[parameters('HiveStaging_connectionString')]"
 					},
@@ -204,6 +219,12 @@
 					"AmazonS31_properties_typeProperties_accessKeyId": {
 						"value": "[parameters('AmazonS31_properties_typeProperties_accessKeyId')]"
 					},
+					"Hdfs1_properties_typeProperties_url": {
+						"value": "[parameters('Hdfs1_properties_typeProperties_url')]"
+					},
+					"Hdfs1_properties_typeProperties_userName": {
+						"value": "[parameters('Hdfs1_properties_typeProperties_userName')]"
+					},
 					"KPAKS_properties_typeProperties_host": {
 						"value": "[parameters('KPAKS_properties_typeProperties_host')]"
 					},
@@ -230,15 +251,6 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
-					},
-					"skshadoopls_password": {
-						"value": "[parameters('skshadoopls_password')]"
-					},
-					"skshadoopls_properties_typeProperties_host": {
-						"value": "[parameters('skshadoopls_properties_typeProperties_host')]"
-					},
-					"skshadoopls_properties_typeProperties_username": {
-						"value": "[parameters('skshadoopls_properties_typeProperties_username')]"
 					}
 				}
 			},
@@ -259,6 +271,15 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					},
+					"skshadoopls_password": {
+						"value": "[parameters('skshadoopls_password')]"
+					},
+					"skshadoopls_properties_typeProperties_host": {
+						"value": "[parameters('skshadoopls_properties_typeProperties_host')]"
+					},
+					"skshadoopls_properties_typeProperties_username": {
+						"value": "[parameters('skshadoopls_properties_typeProperties_username')]"
 					}
 				}
 			},

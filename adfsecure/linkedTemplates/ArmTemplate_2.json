@@ -6,12 +6,56 @@
 			"type": "string",
 			"metadata": "Data Factory name",
 			"defaultValue": "adfsecure"
+		},
+		"skshadoopls_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'skshadoopls'"
+		},
+		"skshadoopls_properties_typeProperties_host": {
+			"type": "string",
+			"defaultValue": "skshadoop.azurehdinsight.net"
+		},
+		"skshadoopls_properties_typeProperties_username": {
+			"type": "string",
+			"defaultValue": "admin"
 		}
 	},
 	"variables": {
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/skshadoopls')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "Hive",
+				"typeProperties": {
+					"host": "[parameters('skshadoopls_properties_typeProperties_host')]",
+					"port": 443,
+					"serverType": "HiveServer2",
+					"authenticationType": "WindowsAzureHDInsightService",
+					"serviceDiscoveryMode": false,
+					"useNativeQuery": false,
+					"username": "[parameters('skshadoopls_properties_typeProperties_username')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('skshadoopls_password')]"
+					},
+					"enableSsl": false,
+					"storageReference": {
+						"referenceName": "HiveStaging",
+						"type": "LinkedServiceReference"
+					}
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": []
+		},
 		{
 			"name": "[concat(parameters('factoryName'), '/BulkCopyfromDB_with_ControlTable')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
@@ -709,6 +753,85 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/dataflow3')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "AzureSynapseAnalyticsTable1",
+								"type": "DatasetReference"
+							},
+							"name": "source1"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "DelimitedText1",
+								"type": "DatasetReference"
+							},
+							"name": "sink1"
+						}
+					],
+					"transformations": [],
+					"scriptLines": [
+						"source(output(",
+						"          EmployeeKey as integer,",
+						"          ParentEmployeeKey as integer,",
+						"          EmployeeNationalIDAlternateKey as string,",
+						"          ParentEmployeeNationalIDAlternateKey as string,",
+						"          SalesTerritoryKey as integer,",
+						"          FirstName as string,",
+						"          LastName as string,",
+						"          MiddleName as string,",
+						"          NameStyle as boolean,",
+						"          Title as string,",
+						"          HireDate as date,",
+						"          BirthDate as date,",
+						"          LoginID as string,",
+						"          EmailAddress as string,",
+						"          Phone as string,",
+						"          MaritalStatus as string,",
+						"          EmergencyContactName as string,",
+						"          EmergencyContactPhone as string,",
+						"          SalariedFlag as boolean,",
+						"          Gender as string,",
+						"          PayFrequency as integer,",
+						"          BaseRate as decimal(19,4),",
+						"          VacationHours as integer,",
+						"          SickLeaveHours as integer,",
+						"          CurrentFlag as boolean,",
+						"          SalesPersonFlag as boolean,",
+						"          DepartmentName as string,",
+						"          StartDate as date,",
+						"          EndDate as date,",
+						"          Status as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     inferDriftedColumnTypes: true,",
+						"     enableCdc: true,",
+						"     mode: 'read',",
+						"     waterMarkColumn: 'EndDate',",
+						"     batchSize: 30,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table',",
+						"     staged: true) ~> source1",
+						"source1 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     format: 'table') ~> sink1"
+					]
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/hiveparallel')]",
 			"type": "Microsoft.DataFactory/factories/dataflows",
 			"apiVersion": "2018-06-01",
@@ -767,7 +890,9 @@
 					]
 				}
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/skshadoopls')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/BulkCopyFromS3')]",

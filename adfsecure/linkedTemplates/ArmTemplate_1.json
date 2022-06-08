@@ -6,24 +6,40 @@
 			"type": "string",
 			"metadata": "Data Factory name",
 			"defaultValue": "adfsecure"
-		},
-		"skshadoopls_password": {
-			"type": "secureString",
-			"metadata": "Secure string for 'password' of 'skshadoopls'"
-		},
-		"skshadoopls_properties_typeProperties_host": {
-			"type": "string",
-			"defaultValue": "skshadoop.azurehdinsight.net"
-		},
-		"skshadoopls_properties_typeProperties_username": {
-			"type": "string",
-			"defaultValue": "admin"
 		}
 	},
 	"variables": {
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSqlDWDataDestination')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Connection to your data destination store.",
+				"linkedServiceName": {
+					"referenceName": "AzureSynapseAnalytics1",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"tableName": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlDWTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": {
+						"value": "@dataset().tableName",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": []
+		},
 		{
 			"name": "[concat(parameters('factoryName'), '/AzureSqlDatabaseDataSource')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
@@ -681,38 +697,6 @@
 					"quoteChar": "\""
 				},
 				"schema": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/skshadoopls')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "Hive",
-				"typeProperties": {
-					"host": "[parameters('skshadoopls_properties_typeProperties_host')]",
-					"port": 443,
-					"serverType": "HiveServer2",
-					"authenticationType": "WindowsAzureHDInsightService",
-					"serviceDiscoveryMode": false,
-					"useNativeQuery": false,
-					"username": "[parameters('skshadoopls_properties_typeProperties_username')]",
-					"password": {
-						"type": "SecureString",
-						"value": "[parameters('skshadoopls_password')]"
-					},
-					"enableSsl": false,
-					"storageReference": {
-						"referenceName": "HiveStaging",
-						"type": "LinkedServiceReference"
-					}
-				},
-				"connectVia": {
-					"referenceName": "AutoResolveIntegrationRuntime",
-					"type": "IntegrationRuntimeReference"
-				}
 			},
 			"dependsOn": []
 		}

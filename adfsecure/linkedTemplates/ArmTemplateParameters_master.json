@@ -23,6 +23,9 @@
 		"AzureSynapseAnalytics1_connectionString": {
 			"value": ""
 		},
+		"Hdfs1_password": {
+			"value": ""
+		},
 		"HiveStaging_connectionString": {
 			"value": ""
 		},
@@ -40,6 +43,12 @@
 		},
 		"AmazonS31_properties_typeProperties_accessKeyId": {
 			"value": "AKIAJLLI67JFVJXALOYA"
+		},
+		"Hdfs1_properties_typeProperties_url": {
+			"value": "adl://skshadoop-2022-02-11t18-17-57-665z@skshadoophdistorage.blob.core.windows.net/data"
+		},
+		"Hdfs1_properties_typeProperties_userName": {
+			"value": "sshuser"
 		},
 		"KPAKS_properties_typeProperties_host": {
 			"value": "20.81.12.199"
