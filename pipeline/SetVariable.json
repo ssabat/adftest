@@ -1,0 +1,29 @@
+{
+	"name": "SetVariable",
+	"properties": {
+		"activities": [
+			{
+				"name": "Set variable1",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [
+					{
+						"name": "name",
+						"value": "sunil"
+					}
+				],
+				"typeProperties": {
+					"variableName": "name",
+					"value": "sunil kumar sabat"
+				}
+			}
+		],
+		"variables": {
+			"name": {
+				"type": "String",
+				"defaultValue": "sunil"
+			}
+		},
+		"annotations": []
+	}
+}
