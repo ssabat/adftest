@@ -13,15 +13,28 @@
 					}
 				],
 				"typeProperties": {
-					"variableName": "name",
+					"variableName": "Name",
 					"value": "sunil kumar sabat"
+				}
+			},
+			{
+				"name": "Increment J",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "j",
+					"value": "@string(add(int(variables('i')),1))"
 				}
 			}
 		],
 		"variables": {
-			"name": {
+			"Name": {
 				"type": "String",
 				"defaultValue": "sunil"
+			},
+			"j": {
+				"type": "String"
 			}
 		},
 		"annotations": []
