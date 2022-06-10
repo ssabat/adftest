@@ -21,8 +21,8 @@
 					}
 				],
 				"typeProperties": {
-					"variableName": "Name",
-					"value": "sunil kumar sabat"
+					"variableName": "j",
+					"value": "@variables('j')"
 				}
 			},
 			{
