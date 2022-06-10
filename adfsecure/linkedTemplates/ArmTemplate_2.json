@@ -25,6 +25,32 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/sourcefiledelimited')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": "samples",
+						"container": "adfsecureblob"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/skshadoopls')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -464,7 +490,9 @@
 				"annotations": [],
 				"lastPublishTime": "2020-12-30T15:37:18Z"
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/sourcefiledelimited')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/parquersinnk')]",
@@ -1381,7 +1409,7 @@
 							},
 							"traceLevel": "Fine",
 							"continuationSettings": {
-								"customizedCheckpointKey": "19fb6851-9b9f-4812-8a73-60a81f80df9f"
+								"customizedCheckpointKey": "04a2a7a3-cd46-4ce4-85aa-04ce3e9c93c1"
 							}
 						}
 					}
