@@ -786,9 +786,17 @@
 			"properties": {
 				"activities": [
 					{
-						"name": "Set variable1",
+						"name": "Set i",
+						"description": "@variables('j')",
 						"type": "SetVariable",
-						"dependsOn": [],
+						"dependsOn": [
+							{
+								"activity": "Increment J",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
 						"userProperties": [
 							{
 								"name": "name",
@@ -796,8 +804,18 @@
 							}
 						],
 						"typeProperties": {
-							"variableName": "name",
-							"value": "sunil kumar sabat"
+							"variableName": "j",
+							"value": "@variables('j')"
+						}
+					},
+					{
+						"name": "Increment J",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "j",
+							"value": "@string(add(int(variables('i')),1))"
 						}
 					}
 				],
@@ -806,9 +824,9 @@
 					"cancelAfter": {}
 				},
 				"variables": {
-					"name": {
+					"j": {
 						"type": "String",
-						"defaultValue": "sunil"
+						"defaultValue": "1"
 					}
 				},
 				"annotations": []
@@ -1321,7 +1339,7 @@
 							},
 							"traceLevel": "Fine",
 							"continuationSettings": {
-								"customizedCheckpointKey": "e22eae41-6def-411c-89c1-d02e133a8eb4"
+								"customizedCheckpointKey": "e37995e7-4b7e-42fc-a84b-d31d221093e3"
 							}
 						}
 					}

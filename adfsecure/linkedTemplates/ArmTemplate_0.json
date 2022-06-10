@@ -129,9 +129,17 @@
 			"properties": {
 				"activities": [
 					{
-						"name": "Set variable1",
+						"name": "Set i",
+						"description": "@variables('j')",
 						"type": "SetVariable",
-						"dependsOn": [],
+						"dependsOn": [
+							{
+								"activity": "Increment J",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
 						"userProperties": [
 							{
 								"name": "name",
@@ -139,8 +147,18 @@
 							}
 						],
 						"typeProperties": {
-							"variableName": "name",
-							"value": "sunil kumar sabat"
+							"variableName": "j",
+							"value": "@variables('j')"
+						}
+					},
+					{
+						"name": "Increment J",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "j",
+							"value": "@string(add(int(variables('i')),1))"
 						}
 					}
 				],
@@ -149,9 +167,9 @@
 					"cancelAfter": {}
 				},
 				"variables": {
-					"name": {
+					"j": {
 						"type": "String",
-						"defaultValue": "sunil"
+						"defaultValue": "1"
 					}
 				},
 				"annotations": []
