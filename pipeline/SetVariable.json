@@ -37,12 +37,9 @@
 			}
 		],
 		"variables": {
-			"Name": {
-				"type": "String",
-				"defaultValue": "sunil"
-			},
 			"j": {
-				"type": "String"
+				"type": "String",
+				"defaultValue": "1"
 			}
 		},
 		"annotations": []
