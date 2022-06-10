@@ -40,6 +40,16 @@
 						"type": "Expression"
 					}
 				}
+			},
+			{
+				"name": "Append variable1",
+				"type": "AppendVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "appendme",
+					"value": "1"
+				}
 			}
 		],
 		"variables": {
@@ -50,6 +60,9 @@
 			"i": {
 				"type": "String",
 				"defaultValue": "1"
+			},
+			"appendme": {
+				"type": "Array"
 			}
 		},
 		"annotations": []
