@@ -4,7 +4,7 @@
 		"activities": [
 			{
 				"name": "Set i",
-				"description": "@variables('j')",
+				"description": "",
 				"type": "SetVariable",
 				"dependsOn": [
 					{
@@ -21,8 +21,11 @@
 					}
 				],
 				"typeProperties": {
-					"variableName": "j",
-					"value": "@variables('j')"
+					"variableName": "i",
+					"value": {
+						"value": "@variables('j')",
+						"type": "Expression"
+					}
 				}
 			},
 			{
@@ -32,12 +35,19 @@
 				"userProperties": [],
 				"typeProperties": {
 					"variableName": "j",
-					"value": "@string(add(int(variables('i')),1))"
+					"value": {
+						"value": "@string(add(int(variables('i')),1))",
+						"type": "Expression"
+					}
 				}
 			}
 		],
 		"variables": {
 			"j": {
+				"type": "String",
+				"defaultValue": "1"
+			},
+			"i": {
 				"type": "String",
 				"defaultValue": "1"
 			}
