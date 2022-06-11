@@ -92,7 +92,7 @@
 							"userProperties": [],
 							"typeProperties": {
 								"variableName": "test",
-								"value": "@string(item()\n"
+								"value": "@string(item())\n"
 							}
 						}
 					]
