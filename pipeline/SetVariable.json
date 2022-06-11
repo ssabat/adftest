@@ -127,8 +127,8 @@
 				]
 			},
 			"alert": {
-				"type": "bool",
-				"defaultValue": "0"
+				"type": "int",
+				"defaultValue": 0
 			}
 		},
 		"variables": {
