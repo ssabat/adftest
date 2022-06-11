@@ -81,9 +81,24 @@
 				"userProperties": [],
 				"typeProperties": {
 					"expression": {
-						"value": "@activity('Filter1').output",
+						"value": "@bool(1)",
 						"type": "Expression"
 					},
+					"ifFalseActivities": [
+						{
+							"name": "Execute Pipeline1",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PWC_NLP",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true
+							}
+						}
+					],
 					"ifTrueActivities": [
 						{
 							"name": "Set variable1",
