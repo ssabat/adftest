@@ -787,7 +787,7 @@
 				"activities": [
 					{
 						"name": "Set i",
-						"description": "@variables('j')",
+						"description": "",
 						"type": "SetVariable",
 						"dependsOn": [
 							{
@@ -804,8 +804,11 @@
 							}
 						],
 						"typeProperties": {
-							"variableName": "j",
-							"value": "@variables('j')"
+							"variableName": "i",
+							"value": {
+								"value": "@variables('j')",
+								"type": "Expression"
+							}
 						}
 					},
 					{
@@ -815,7 +818,83 @@
 						"userProperties": [],
 						"typeProperties": {
 							"variableName": "j",
-							"value": "@string(add(int(variables('i')),1))"
+							"value": {
+								"value": "@string(add(int(variables('i')),1))",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Append variable1",
+						"type": "AppendVariable",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "appendme",
+							"value": "1"
+						}
+					},
+					{
+						"name": "Filter1",
+						"type": "Filter",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@pipeline().parameters.inputs",
+								"type": "Expression"
+							},
+							"condition": {
+								"value": "@greater(item(),3)",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "If Condition1",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "Filter1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(pipeline().parameters.alert,0 )",
+								"type": "Expression"
+							},
+							"ifFalseActivities": [
+								{
+									"name": "Execute Pipeline1",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PWC_NLP",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {}
+									}
+								}
+							],
+							"ifTrueActivities": [
+								{
+									"name": "Set variable1",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "test",
+										"value": "@string(item())\n"
+									}
+								}
+							]
 						}
 					}
 				],
@@ -823,15 +902,44 @@
 					"elapsedTimeMetric": {},
 					"cancelAfter": {}
 				},
+				"parameters": {
+					"inputs": {
+						"type": "array",
+						"defaultValue": [
+							1,
+							2,
+							3,
+							4,
+							5,
+							6
+						]
+					},
+					"alert": {
+						"type": "int",
+						"defaultValue": 0
+					}
+				},
 				"variables": {
 					"j": {
 						"type": "String",
 						"defaultValue": "1"
+					},
+					"i": {
+						"type": "String",
+						"defaultValue": "1"
+					},
+					"appendme": {
+						"type": "Array"
+					},
+					"test": {
+						"type": "String"
 					}
 				},
 				"annotations": []
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PWC_NLP')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/copyforeach')]",
@@ -1339,7 +1447,7 @@
 							},
 							"traceLevel": "Fine",
 							"continuationSettings": {
-								"customizedCheckpointKey": "e37995e7-4b7e-42fc-a84b-d31d221093e3"
+								"customizedCheckpointKey": "48e38873-5f95-45d7-acf8-ca5130898879"
 							}
 						}
 					}
