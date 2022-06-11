@@ -1,0 +1,70 @@
+{
+	"name": "SetVariable",
+	"properties": {
+		"activities": [
+			{
+				"name": "Set i",
+				"description": "",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Increment J",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [
+					{
+						"name": "name",
+						"value": "sunil"
+					}
+				],
+				"typeProperties": {
+					"variableName": "i",
+					"value": {
+						"value": "@variables('j')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Increment J",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "j",
+					"value": {
+						"value": "@string(add(int(variables('i')),1))",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Append variable1",
+				"type": "AppendVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "appendme",
+					"value": "1"
+				}
+			}
+		],
+		"variables": {
+			"j": {
+				"type": "String",
+				"defaultValue": "1"
+			},
+			"i": {
+				"type": "String",
+				"defaultValue": "1"
+			},
+			"appendme": {
+				"type": "Array"
+			}
+		},
+		"annotations": []
+	}
+}
