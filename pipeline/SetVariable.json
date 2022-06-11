@@ -80,12 +80,20 @@
 				],
 				"userProperties": [],
 				"typeProperties": {
+					"expression": {
+						"value": "@activity('Filter1').output",
+						"type": "Expression"
+					},
 					"ifTrueActivities": [
 						{
 							"name": "Set variable1",
 							"type": "SetVariable",
 							"dependsOn": [],
-							"userProperties": []
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "test",
+								"value": "@string(item()\n"
+							}
 						}
 					]
 				}
@@ -94,7 +102,14 @@
 		"parameters": {
 			"inputs": {
 				"type": "array",
-				"defaultValue": "[1.2.3.4.5.6]"
+				"defaultValue": [
+					1,
+					2,
+					3,
+					4,
+					5,
+					6
+				]
 			}
 		},
 		"variables": {
