@@ -50,8 +50,53 @@
 					"variableName": "appendme",
 					"value": "1"
 				}
+			},
+			{
+				"name": "Filter1",
+				"type": "Filter",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@pipeline().parameters.inputs",
+						"type": "Expression"
+					},
+					"condition": {
+						"value": "@greater(item(),3)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "If Condition1",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Filter1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"ifTrueActivities": [
+						{
+							"name": "Set variable1",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": []
+						}
+					]
+				}
 			}
 		],
+		"parameters": {
+			"inputs": {
+				"type": "array",
+				"defaultValue": "[1.2.3.4.5.6]"
+			}
+		},
 		"variables": {
 			"j": {
 				"type": "String",
@@ -63,6 +108,9 @@
 			},
 			"appendme": {
 				"type": "Array"
+			},
+			"test": {
+				"type": "String"
 			}
 		},
 		"annotations": []
