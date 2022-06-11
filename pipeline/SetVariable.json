@@ -81,7 +81,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"expression": {
-						"value": "@bool(1)",
+						"value": "@equals(pipeline().parameters.alert,0 )",
 						"type": "Expression"
 					},
 					"ifFalseActivities": [
@@ -125,6 +125,10 @@
 					5,
 					6
 				]
+			},
+			"alert": {
+				"type": "bool",
+				"defaultValue": "0"
 			}
 		},
 		"variables": {
