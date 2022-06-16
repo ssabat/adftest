@@ -1,0 +1,20 @@
+{
+	"name": "Hive1",
+	"properties": {
+		"annotations": [],
+		"type": "Hive",
+		"typeProperties": {
+			"host": "x.com",
+			"port": 443,
+			"authenticationType": "Anonymous",
+			"serviceDiscoveryMode": false,
+			"useNativeQuery": false,
+			"password": false,
+			"enableSsl": false
+		},
+		"connectVia": {
+			"referenceName": "AutoResolveIntegrationRuntime",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}
