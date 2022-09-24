@@ -1,0 +1,9 @@
+{
+	"name": "sksteutest",
+	"location": "northeurope",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "2e5e626e-1adf-47d1-89ff-3f580fe9541e",
+		"tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47"
+	}
+}
