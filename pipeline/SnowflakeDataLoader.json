@@ -20,6 +20,7 @@
 						"storeSettings": {
 							"type": "AzureBlobStorageReadSettings",
 							"recursive": true,
+							"wildcardFileName": "*",
 							"enablePartitionDiscovery": false
 						},
 						"formatSettings": {
@@ -36,7 +37,7 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "SourceDataset_esc",
+						"referenceName": "DelimitedText1",
 						"type": "DatasetReference"
 					}
 				],
