@@ -1,0 +1,18 @@
+{
+	"name": "BlobEvent",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [],
+		"type": "BlobEventsTrigger",
+		"typeProperties": {
+			"blobPathBeginsWith": "/skscontainer/blobs/heath_insurance.csv",
+			"ignoreEmptyBlobs": true,
+			"scope": "/subscriptions/222f1459-6ebd-4896-82ab-652d5f6883cf/resourceGroups/sksrg/providers/Microsoft.Storage/storageAccounts/sksblob",
+			"events": [
+				"Microsoft.Storage.BlobCreated",
+				"Microsoft.Storage.BlobDeleted"
+			]
+		}
+	}
+}
