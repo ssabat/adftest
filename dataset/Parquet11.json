@@ -1,0 +1,41 @@
+{
+	"name": "Parquet11",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorage1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "parquet.out",
+				"container": "adfsecureblob"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": [
+			{
+				"name": "SalesAmount",
+				"type": "DECIMAL",
+				"precision": 19,
+				"scale": 4
+			},
+			{
+				"name": "PostalCode",
+				"type": "UTF8"
+			},
+			{
+				"name": "CustomerIncome",
+				"type": "DECIMAL",
+				"precision": 19,
+				"scale": 4
+			},
+			{
+				"name": "OrderDate",
+				"type": "DATE"
+			}
+		]
+	}
+}

@@ -1,5 +1,5 @@
 {
-	"name": "SnowflakeDataLoader",
+	"name": "SnowflakeDataLoader1",
 	"properties": {
 		"activities": [
 			{
@@ -16,14 +16,14 @@
 				"userProperties": [],
 				"typeProperties": {
 					"source": {
-						"type": "DelimitedTextSource",
+						"type": "ParquetSource",
 						"storeSettings": {
 							"type": "AzureBlobStorageReadSettings",
 							"recursive": true,
 							"enablePartitionDiscovery": false
 						},
 						"formatSettings": {
-							"type": "DelimitedTextReadSettings"
+							"type": "ParquetReadSettings"
 						}
 					},
 					"sink": {
@@ -36,13 +36,13 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "SourceDataset_esc",
+						"referenceName": "Parquet11",
 						"type": "DatasetReference"
 					}
 				],
 				"outputs": [
 					{
-						"referenceName": "SnowflakeTable1",
+						"referenceName": "SnowflakeTable11",
 						"type": "DatasetReference"
 					}
 				]

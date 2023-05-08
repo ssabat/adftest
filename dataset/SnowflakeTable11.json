@@ -1,0 +1,29 @@
+{
+	"name": "SnowflakeTable11",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Snowflake1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "SnowflakeTable",
+		"schema": [
+			{
+				"name": "ID",
+				"type": "NUMBER",
+				"precision": 19,
+				"scale": 0
+			},
+			{
+				"name": "DT",
+				"type": "DATE",
+				"precision": 10,
+				"scale": 0
+			}
+		],
+		"typeProperties": {
+			"schema": "PUBLIC",
+			"table": "VISITS"
+		}
+	}
+}
